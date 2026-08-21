@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SPI練習 Web版 原本</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=1.7.1">
 </head>
 <body>
 <main class="app">
   <header>
     <h1>SPI練習 Web版</h1>
-    <p>750問・ブラウザ完結型 原本 v1</p>
+    <p>750問・ブラウザ完結型 <strong>v1.7.1</strong></p>
   </header>
 
   <section id="setup" class="card">
@@ -61,6 +61,14 @@
 
     <div id="tutorPanel" class="tutor-panel hidden">
       <div class="tutor-title">家庭教師モード</div>
+      <div id="tutorLead" class="tutor-lead"></div>
+
+      <div id="tutorControls" class="tutor-controls">
+        <button id="tutorStep1Btn">最初の一歩</button>
+        <button id="tutorStep2Btn">もう少し考える</button>
+        <button id="tutorStep3Btn">最後のヒント</button>
+      </div>
+
       <div id="tutorBody"></div>
 
       <div id="understandingArea" class="hidden">
@@ -90,7 +98,7 @@
     </div>
   </section>
 </main>
-<script src="questions.js"></script>
-<script src="app.js"></script>
+<script src="questions.js?v=1.7.1"></script>
+<script src="app.js?v=1.7.1"></script>
 </body>
 </html>
