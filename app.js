@@ -1,4 +1,4 @@
-window.SPI_APP_VERSION="1.7.1";
+window.SPI_APP_VERSION="1.7.2";
 
 let QUESTIONS=[];
 const state={selected:[],index:0,correct:0,attempts:0,hintIndex:0,answered:false,records:[],settings:null,lastPool:[],studyMode:"normal",tutorHelpCount:0,understood:false};
@@ -178,7 +178,7 @@ function answer(k){
       understood:state.understood
     });
     $("score").textContent=`正解 ${state.correct}`;
-    tutorOnFinish(q);return;
+    return;
   }
   b.classList.add("wrong");b.disabled=true;
   const msg=q.diagnostics?.[k]?.message||"条件をもう一度確認してください。";
