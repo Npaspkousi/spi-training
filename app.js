@@ -1,7 +1,7 @@
-window.SPI_APP_VERSION="1.7.2";
+window.SPI_APP_VERSION="1.8";
 
 let QUESTIONS=[];
-const state={selected:[],index:0,correct:0,attempts:0,hintIndex:0,answered:false,records:[],settings:null,lastPool:[],studyMode:"normal",tutorHelpCount:0,understood:false};
+const state={selected:[],index:0,correct:0,attempts:0,hintIndex:0,answered:false,records:[],settings:null,lastPool:[],studyMode:"normal",tutorHelpCount:0,understood:false,tutorShown:new Set()};
 const $=id=>document.getElementById(id);
 
 function init(){
@@ -39,7 +39,7 @@ function resetQ(){
   $("understandingArea").classList.add("hidden");$("modelAnswer").classList.add("hidden");
   $("modelAnswer").textContent="";$("understandingInput").value="";
   $("understoodBtn").textContent="理解できた";$("understoodBtn").disabled=false;
-  state.tutorHelpCount=0;state.understood=false;
+  state.tutorHelpCount=0;state.understood=false;state.tutorShown=new Set();
 }
 function render(){
   resetQ();const q=current();
@@ -57,14 +57,35 @@ function render(){
 function disableOptions(){document.querySelectorAll(".option").forEach(b=>b.disabled=true)}
 
 
-function addTutorStep(title,text){
+
+function addTutorStep(key,title,text){
   if(state.studyMode!=="tutor") return;
+  if(state.tutorShown.has(key)) return;
+
+  state.tutorShown.add(key);
   $("tutorPanel").classList.remove("hidden");
+
   const div=document.createElement("div");
   div.className="tutor-step";
   div.innerHTML=`<strong>${escapeHtml(title)}</strong><br>${escapeHtml(text)}`;
   $("tutorBody").appendChild(div);
+
   state.tutorHelpCount++;
+  updateTutorProgress();
+}
+
+function updateTutorProgress(){
+  const host=document.getElementById("tutorProgress");
+  if(!host) return;
+  const keys=["organize","plan","finish"];
+  [...host.children].forEach((el,i)=>{
+    if(state.tutorShown.has(keys[i])) el.classList.add("done");
+  });
+}
+
+function lastQuestionSentence(text){
+  const lines=String(text).split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  return lines.length ? lines[lines.length-1] : text;
 }
 
 function initTutorForQuestion(q){
@@ -74,8 +95,22 @@ function initTutorForQuestion(q){
   }
 
   $("tutorPanel").classList.remove("hidden");
-  $("tutorLead").textContent=
-    "一緒に考えよう。まずは問題文の中で「分かっていること」と「求めるもの」を分けてみてください。必要なら下のボタンから一歩ずつ進めます。";
+  $("tutorLead").innerHTML=`
+    <div class="tutor-guide">
+      <div class="tutor-guide-title">一緒に解いていこう</div>
+      <div class="tutor-guide-sub">
+        すぐ答えを探さず、①問題を整理 → ②方針を立てる → ③仕上げる、の順で進みます。
+      </div>
+      <div id="tutorProgress" class="tutor-progress">
+        <span>①整理</span><span>②方針</span><span>③仕上げ</span>
+      </div>
+    </div>`;
+
+  addTutorStep(
+    "start",
+    "まず確認",
+    `この問題は「${q.chapter_name}」です。最終的に聞かれているのは「${lastQuestionSentence(q.question_text)}」です。`
+  );
 }
 
 function showTutorStep(step){
@@ -83,23 +118,23 @@ function showTutorStep(step){
   const q=current();
 
   if(step===1){
-    addTutorStep(
-      "最初の一歩",
-      q.quick_tip || "問題文の中で、確定している条件を一つ見つけてください。"
-    );
+    const text =
+      `まず問題文から「確定していること」と「求めるもの」を分けます。` +
+      (q.quick_tip ? ` この問題では、${q.quick_tip}` : "");
+    addTutorStep("organize","① 問題を整理",text);
     $("tutorStep1Btn").disabled=true;
+
   }else if(step===2){
-    addTutorStep(
-      "もう少し考える",
-      q.hints?.[0] || "使う条件を一つずつ整理してみましょう。"
-    );
-    if(q.hints?.[1]) addTutorStep("次に見るポイント",q.hints[1]);
+    let text = q.hints?.[0] || "使う条件や数値を一つずつ取り出してみましょう。";
+    if(q.hints?.[1]) text += ` 次に、${q.hints[1]}`;
+    addTutorStep("plan","② 方針を立てる",text);
     $("tutorStep2Btn").disabled=true;
+
   }else if(step===3){
-    addTutorStep(
-      "最後のヒント",
-      q.hints?.[2] || q.hints?.[1] || "選択肢を一つずつ条件と照らし合わせてください。"
-    );
+    const text =
+      (q.hints?.[2] || q.hints?.[1] || "ここまで整理した内容を使って、選択肢を一つずつ確かめましょう。") +
+      " ここでは答えを丸暗記せず、なぜその選択肢になるかを確認してください。";
+    addTutorStep("finish","③ 一緒に仕上げる",text);
     $("tutorStep3Btn").disabled=true;
   }
 }
@@ -109,31 +144,32 @@ function tutorOnWrong(q,key){
   const diag=q.diagnostics?.[key]?.message || "条件をもう一度整理してみましょう。";
 
   addTutorStep(
-    "その考え方を少し見直そう",
-    diag
+    `wrong-${state.attempts}`,
+    "いまの考え方を確認しよう",
+    `${diag} どこで判断したかを一度戻って、条件と照らし合わせてみましょう。`
   );
 
-  if(state.attempts===1){
-    addTutorStep(
-      "次にやること",
-      "答えをすぐ変えるのではなく、今使った条件が本当に問題文と合っているか一つずつ確認してみてください。"
-    );
-  }else if(state.attempts===2){
-    addTutorStep(
-      "もう一度整理",
-      q.hints?.[1] || q.hints?.[0] || "残っている候補と条件を対応させてみましょう。"
-    );
+  if(state.attempts===1 && !state.tutorShown.has("organize")){
+    showTutorStep(1);
+  }else if(state.attempts===2 && !state.tutorShown.has("plan")){
+    showTutorStep(2);
   }
 }
 
 function tutorOnFinish(q){
   if(state.studyMode!=="tutor") return;
+
   $("tutorPanel").classList.remove("hidden");
   $("tutorStep1Btn").disabled=true;
   $("tutorStep2Btn").disabled=true;
   $("tutorStep3Btn").disabled=true;
 
-  addTutorStep("一緒に整理すると",q.explanation);
+  addTutorStep(
+    "solution",
+    "最後に一緒に整理",
+    q.explanation
+  );
+
   $("understandingArea").classList.remove("hidden");
   $("understandingQuestion").textContent=
     q.understanding_question || "この問題の考え方を、自分の言葉で一言説明してみてください。";
@@ -215,13 +251,15 @@ function showHint(){
   const q=current();
 
   if(state.studyMode==="tutor"){
-    if(state.hintIndex===0) showTutorStep(1);
-    else if(state.hintIndex===1) showTutorStep(2);
-    else if(state.hintIndex===2) showTutorStep(3);
-    else{
-      $("hintBox").textContent="これ以上ヒントはありません。";
+    if(!state.tutorShown.has("organize")){
+      showTutorStep(1);
+    }else if(!state.tutorShown.has("plan")){
+      showTutorStep(2);
+    }else if(!state.tutorShown.has("finish")){
+      showTutorStep(3);
+    }else{
+      $("hintBox").textContent="ここまでの手順を使って、一度自分で答えを選んでみてください。";
       $("hintBox").classList.remove("hidden");
-      return;
     }
     state.hintIndex++;
     return;
