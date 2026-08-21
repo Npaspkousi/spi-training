@@ -140,3 +140,24 @@ button{border:0;border-radius:10px;padding:10px 16px;cursor:pointer}.primary{bac
 #understandingInput{width:100%;margin-top:10px;padding:10px;font:inherit;border:1px solid #cbd5e1;border-radius:8px;resize:vertical}
 .tutor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .model-answer{margin-top:10px;padding:10px 12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;white-space:pre-wrap}
+
+.tutor-lead{
+  padding:10px 12px;
+  background:#fff;
+  border:1px solid #dbeafe;
+  border-radius:8px;
+  margin-bottom:10px;
+}
+.tutor-controls{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.tutor-controls button{
+  background:#fff;
+  border:1px solid #93c5fd;
+}
+.tutor-controls button:disabled{
+  opacity:.45;
+}
