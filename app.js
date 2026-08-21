@@ -18,9 +18,6 @@ function init(){
   $("nextLevelBtn").onclick=nextLevel;
   $("showModelBtn").onclick=showModelAnswer;
   $("understoodBtn").onclick=markUnderstood;
-  $("tutorStep1Btn").onclick=()=>showTutorStep(1);
-  $("tutorStep2Btn").onclick=()=>showTutorStep(2);
-  $("tutorStep3Btn").onclick=()=>showTutorStep(3);
 }
 function shuffle(a){
   a=[...a];
@@ -33,8 +30,6 @@ function resetQ(){
   $("hintBox").classList.add("hidden");$("feedback").classList.add("hidden");$("nextBtn").classList.add("hidden");
   $("hintBox").textContent="";$("feedback").textContent="";$("hintBtn").disabled=false;
   $("tutorPanel").classList.add("hidden");$("tutorBody").innerHTML="";
-  $("tutorLead").textContent="";
-  $("tutorStep1Btn").disabled=false;$("tutorStep2Btn").disabled=false;$("tutorStep3Btn").disabled=false;
   $("understandingArea").classList.add("hidden");$("modelAnswer").classList.add("hidden");
   $("modelAnswer").textContent="";$("understandingInput").value="";
   $("understoodBtn").textContent="理解できた";$("understoodBtn").disabled=false;
@@ -46,7 +41,6 @@ function render(){
   $("score").textContent=`正解 ${state.correct}`;
   $("problemId").textContent=q.problem_id;$("chapter").textContent=q.chapter_name;$("difficulty").textContent=`Level ${q.difficulty}`;
   $("question").textContent=q.question_text;
-  initTutorForQuestion(q);
   const box=$("options");box.innerHTML="";
   for(const k of ["A","B","C","D"]){
     const b=document.createElement("button");b.className="option";b.dataset.key=k;b.textContent=`${k}. ${q.options[k]}`;
@@ -54,7 +48,6 @@ function render(){
   }
 }
 function disableOptions(){document.querySelectorAll(".option").forEach(b=>b.disabled=true)}
-
 
 function addTutorStep(title,text){
   if(state.studyMode!=="tutor") return;
@@ -66,76 +59,26 @@ function addTutorStep(title,text){
   state.tutorHelpCount++;
 }
 
-function initTutorForQuestion(q){
-  if(state.studyMode!=="tutor"){
-    $("tutorPanel").classList.add("hidden");
-    return;
-  }
-
-  $("tutorPanel").classList.remove("hidden");
-  $("tutorLead").textContent=
-    "一緒に考えよう。まずは問題文の中で「分かっていること」と「求めるもの」を分けてみてください。必要なら下のボタンから一歩ずつ進めます。";
-}
-
-function showTutorStep(step){
-  if(state.studyMode!=="tutor" || state.answered) return;
-  const q=current();
-
-  if(step===1){
-    addTutorStep(
-      "最初の一歩",
-      q.quick_tip || "問題文の中で、確定している条件を一つ見つけてください。"
-    );
-    $("tutorStep1Btn").disabled=true;
-  }else if(step===2){
-    addTutorStep(
-      "もう少し考える",
-      q.hints?.[0] || "使う条件を一つずつ整理してみましょう。"
-    );
-    if(q.hints?.[1]) addTutorStep("次に見るポイント",q.hints[1]);
-    $("tutorStep2Btn").disabled=true;
-  }else if(step===3){
-    addTutorStep(
-      "最後のヒント",
-      q.hints?.[2] || q.hints?.[1] || "選択肢を一つずつ条件と照らし合わせてください。"
-    );
-    $("tutorStep3Btn").disabled=true;
-  }
-}
-
 function tutorOnWrong(q,key){
   if(state.studyMode!=="tutor") return;
-  const diag=q.diagnostics?.[key]?.message || "条件をもう一度整理してみましょう。";
-
-  addTutorStep(
-    "その考え方を少し見直そう",
-    diag
-  );
-
+  const diag=q.diagnostics?.[key]?.message || "条件を整理してみましょう。";
   if(state.attempts===1){
-    addTutorStep(
-      "次にやること",
-      "答えをすぐ変えるのではなく、今使った条件が本当に問題文と合っているか一つずつ確認してみてください。"
-    );
+    addTutorStep("まず確認",diag);
+    if(q.quick_tip) addTutorStep("考え方の入口",q.quick_tip);
   }else if(state.attempts===2){
-    addTutorStep(
-      "もう一度整理",
-      q.hints?.[1] || q.hints?.[0] || "残っている候補と条件を対応させてみましょう。"
-    );
+    addTutorStep("もう一段ヒント",q.hints?.[0] || q.quick_tip || "条件を一つずつ確認します。");
+    if(q.hints?.[1]) addTutorStep("次に見るポイント",q.hints[1]);
+  }else{
+    if(q.hints?.[2]) addTutorStep("最後のヒント",q.hints[2]);
   }
 }
 
 function tutorOnFinish(q){
   if(state.studyMode!=="tutor") return;
   $("tutorPanel").classList.remove("hidden");
-  $("tutorStep1Btn").disabled=true;
-  $("tutorStep2Btn").disabled=true;
-  $("tutorStep3Btn").disabled=true;
-
-  addTutorStep("一緒に整理すると",q.explanation);
+  addTutorStep("解き方の整理",q.explanation);
   $("understandingArea").classList.remove("hidden");
-  $("understandingQuestion").textContent=
-    q.understanding_question || "この問題の考え方を、自分の言葉で一言説明してみてください。";
+  $("understandingQuestion").textContent=q.understanding_question || "この問題の考え方を一言で説明できますか。";
 }
 
 function showModelAnswer(){
@@ -212,26 +155,8 @@ function answer(k){
 }
 function showHint(){
   const q=current();
-
-  if(state.studyMode==="tutor"){
-    if(state.hintIndex===0) showTutorStep(1);
-    else if(state.hintIndex===1) showTutorStep(2);
-    else if(state.hintIndex===2) showTutorStep(3);
-    else{
-      $("hintBox").textContent="これ以上ヒントはありません。";
-      $("hintBox").classList.remove("hidden");
-      return;
-    }
-    state.hintIndex++;
-    return;
-  }
-
-  if(state.hintIndex>=q.hints.length){
-    $("hintBox").textContent="これ以上ヒントはありません。";
-  }else{
-    $("hintBox").textContent=`ヒント ${state.hintIndex+1}: ${q.hints[state.hintIndex]}`;
-    state.hintIndex++;
-  }
+  if(state.hintIndex>=q.hints.length){$("hintBox").textContent="これ以上ヒントはありません。";}
+  else{$("hintBox").textContent=`ヒント ${state.hintIndex+1}: ${q.hints[state.hintIndex]}`;state.hintIndex++;}
   $("hintBox").classList.remove("hidden");
 }
 function nextQuestion(){state.index++;state.index>=state.selected.length?showResult():render()}
