@@ -37,6 +37,12 @@
           <option value="20">20問</option><option value="50">50問</option>
         </select>
       </label>
+      <label>学習モード
+        <select id="studyMode">
+          <option value="normal">通常練習</option>
+          <option value="tutor" selected>家庭教師モード</option>
+        </select>
+      </label>
     </div>
     <button id="startBtn" class="primary">開始</button>
     <p id="setupMsg" class="msg"></p>
@@ -52,6 +58,23 @@
       <button id="nextBtn" class="primary hidden">次の問題</button>
     </div>
     <div id="hintBox" class="notice hidden"></div>
+
+    <div id="tutorPanel" class="tutor-panel hidden">
+      <div class="tutor-title">家庭教師モード</div>
+      <div id="tutorBody"></div>
+
+      <div id="understandingArea" class="hidden">
+        <div class="understanding-title">理解確認</div>
+        <div id="understandingQuestion"></div>
+        <textarea id="understandingInput" rows="3" placeholder="自分の言葉で答えてみてください"></textarea>
+        <div class="tutor-actions">
+          <button id="showModelBtn">模範回答を見る</button>
+          <button id="understoodBtn">理解できた</button>
+        </div>
+        <div id="modelAnswer" class="model-answer hidden"></div>
+      </div>
+    </div>
+
     <div id="feedback" class="feedback hidden"></div>
   </section>
 

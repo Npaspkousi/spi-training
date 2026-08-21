@@ -1,6 +1,6 @@
 
 let QUESTIONS=[];
-const state={selected:[],index:0,correct:0,attempts:0,hintIndex:0,answered:false,records:[],settings:null,lastPool:[]};
+const state={selected:[],index:0,correct:0,attempts:0,hintIndex:0,answered:false,records:[],settings:null,lastPool:[],studyMode:"normal",tutorHelpCount:0,understood:false};
 const $=id=>document.getElementById(id);
 
 function init(){
@@ -16,6 +16,8 @@ function init(){
   $("retrySameBtn").onclick=retrySame;
   $("reviewWeakBtn").onclick=reviewWeak;
   $("nextLevelBtn").onclick=nextLevel;
+  $("showModelBtn").onclick=showModelAnswer;
+  $("understoodBtn").onclick=markUnderstood;
 }
 function shuffle(a){
   a=[...a];
@@ -27,6 +29,11 @@ function resetQ(){
   state.attempts=0;state.hintIndex=0;state.answered=false;
   $("hintBox").classList.add("hidden");$("feedback").classList.add("hidden");$("nextBtn").classList.add("hidden");
   $("hintBox").textContent="";$("feedback").textContent="";$("hintBtn").disabled=false;
+  $("tutorPanel").classList.add("hidden");$("tutorBody").innerHTML="";
+  $("understandingArea").classList.add("hidden");$("modelAnswer").classList.add("hidden");
+  $("modelAnswer").textContent="";$("understandingInput").value="";
+  $("understoodBtn").textContent="理解できた";$("understoodBtn").disabled=false;
+  state.tutorHelpCount=0;state.understood=false;
 }
 function render(){
   resetQ();const q=current();
@@ -41,6 +48,51 @@ function render(){
   }
 }
 function disableOptions(){document.querySelectorAll(".option").forEach(b=>b.disabled=true)}
+
+function addTutorStep(title,text){
+  if(state.studyMode!=="tutor") return;
+  $("tutorPanel").classList.remove("hidden");
+  const div=document.createElement("div");
+  div.className="tutor-step";
+  div.innerHTML=`<strong>${escapeHtml(title)}</strong><br>${escapeHtml(text)}`;
+  $("tutorBody").appendChild(div);
+  state.tutorHelpCount++;
+}
+
+function tutorOnWrong(q,key){
+  if(state.studyMode!=="tutor") return;
+  const diag=q.diagnostics?.[key]?.message || "条件を整理してみましょう。";
+  if(state.attempts===1){
+    addTutorStep("まず確認",diag);
+    if(q.quick_tip) addTutorStep("考え方の入口",q.quick_tip);
+  }else if(state.attempts===2){
+    addTutorStep("もう一段ヒント",q.hints?.[0] || q.quick_tip || "条件を一つずつ確認します。");
+    if(q.hints?.[1]) addTutorStep("次に見るポイント",q.hints[1]);
+  }else{
+    if(q.hints?.[2]) addTutorStep("最後のヒント",q.hints[2]);
+  }
+}
+
+function tutorOnFinish(q){
+  if(state.studyMode!=="tutor") return;
+  $("tutorPanel").classList.remove("hidden");
+  addTutorStep("解き方の整理",q.explanation);
+  $("understandingArea").classList.remove("hidden");
+  $("understandingQuestion").textContent=q.understanding_question || "この問題の考え方を一言で説明できますか。";
+}
+
+function showModelAnswer(){
+  const q=current();
+  $("modelAnswer").textContent=q.understanding_answer || q.explanation || "模範回答は登録されていません。";
+  $("modelAnswer").classList.remove("hidden");
+}
+
+function markUnderstood(){
+  state.understood=true;
+  $("understoodBtn").textContent="理解済み";
+  $("understoodBtn").disabled=true;
+}
+
 function answer(k){
   if(state.answered)return;
   const q=current();state.attempts++;
@@ -49,6 +101,7 @@ function answer(k){
     state.answered=true;state.correct++;b.classList.add("correct");disableOptions();
     $("feedback").textContent=`正解です。\n\n${q.explanation}`;$("feedback").classList.remove("hidden");
     $("nextBtn").classList.remove("hidden");$("hintBtn").disabled=true;
+    tutorOnFinish(q);
     state.records.push({
       id:q.problem_id,
       result:"正解",
@@ -62,17 +115,22 @@ function answer(k){
       selectedText:q.options[k],
       correct:q.correct_option,
       correctText:q.options[q.correct_option],
-      explanation:q.explanation
+      explanation:q.explanation,
+      tutorHelpCount:state.tutorHelpCount,
+      understood:state.understood
     });
-    $("score").textContent=`正解 ${state.correct}`;return;
+    $("score").textContent=`正解 ${state.correct}`;
+    tutorOnFinish(q);return;
   }
   b.classList.add("wrong");b.disabled=true;
   const msg=q.diagnostics?.[k]?.message||"条件をもう一度確認してください。";
+  tutorOnWrong(q,k);
   if(state.attempts>=q.max_attempts){
     state.answered=true;disableOptions();
     const cb=document.querySelector(`.option[data-key="${q.correct_option}"]`);if(cb)cb.classList.add("correct");
     $("feedback").textContent=`不正解です。\n${msg}\n\n正解：${q.correct_option}. ${q.options[q.correct_option]}\n\n${q.explanation}`;
     $("nextBtn").classList.remove("hidden");$("hintBtn").disabled=true;
+    tutorOnFinish(q);
     state.records.push({
       id:q.problem_id,
       result:"不正解",
@@ -86,7 +144,9 @@ function answer(k){
       selectedText:q.options[k],
       correct:q.correct_option,
       correctText:q.options[q.correct_option],
-      explanation:q.explanation
+      explanation:q.explanation,
+      tutorHelpCount:state.tutorHelpCount,
+      understood:state.understood
     });
   }else{
     $("feedback").textContent=`不正解です。あと ${q.max_attempts-state.attempts} 回挑戦できます。\n${msg}`;
@@ -110,6 +170,7 @@ function showResult(){
   const firstTryPct=Math.round(firstTryCount/total*100);
   const retryCount=state.records.filter(r=>r.attempts>1).length;
   const hintCount=state.records.reduce((sum,r)=>sum+r.hintsUsed,0);
+  const tutorHelp=state.records.reduce((sum,r)=>sum+(r.tutorHelpCount||0),0);
 
   const categories={};
   for(const r of state.records){
@@ -181,6 +242,7 @@ ${escapeHtml(r.explanation)}
       <div class="summary-card"><div class="summary-label">1回目正解率</div><div class="summary-value">${firstTryPct}%</div></div>
       <div class="summary-card"><div class="summary-label">再挑戦した問題</div><div class="summary-value">${retryCount}問</div></div>
       <div class="summary-card"><div class="summary-label">使用ヒント</div><div class="summary-value">${hintCount}回</div></div>
+      ${state.studyMode==="tutor"?`<div class="summary-card"><div class="summary-label">家庭教師支援</div><div class="summary-value">${tutorHelp}回</div></div>`:""}
     </div>
 
     <div class="result-message">${message}</div>
@@ -221,9 +283,10 @@ function shortQuestion(text){
   return one.length>70 ? one.slice(0,70)+"…" : one;
 }
 function startQuiz(){
-  const d=$("domain").value,l=$("level").value,c=Number($("count").value);
+  const d=$("domain").value,l=$("level").value,c=Number($("count").value),m=$("studyMode").value;
+  state.studyMode=m;
   let pool=QUESTIONS.filter(q=>(d==="all"||q.domain===d)&&(l==="all"||q.difficulty===Number(l)));
-  state.settings={domain:d,level:l,count:c};
+  state.settings={domain:d,level:l,count:c,studyMode:m};
   state.lastPool=[...pool];
   if(!pool.length){$("setupMsg").textContent="該当する問題がありません。";return}
   state.selected=shuffle(pool).slice(0,Math.min(c,pool.length));state.index=0;state.correct=0;state.records=[];
@@ -232,6 +295,7 @@ function startQuiz(){
 
 function launchFromPool(pool,count){
   state.selected=shuffle(pool).slice(0,Math.min(count,pool.length));
+  if(state.settings?.studyMode) state.studyMode=state.settings.studyMode;
   state.index=0;
   state.correct=0;
   state.records=[];
@@ -266,7 +330,7 @@ function nextLevel(){
   const pool=QUESTIONS.filter(q=>(d==="all"||q.domain===d)&&q.difficulty===next);
   if(!pool.length) return;
 
-  state.settings={domain:d,level:String(next),count:state.settings.count};
+  state.settings={domain:d,level:String(next),count:state.settings.count,studyMode:state.studyMode};
   state.lastPool=[...pool];
   launchFromPool(pool,state.settings.count);
 }
