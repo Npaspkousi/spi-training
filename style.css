@@ -336,3 +336,79 @@ button{border:0;border-radius:10px;padding:10px 16px;cursor:pointer}.primary{bac
     margin-top:16px;
   }
 }
+
+
+/* v1.9.3: keep tutor fully inside the visible viewport */
+.quiz-tutor{
+  min-width:0;
+  align-self:start;
+}
+
+/* At the top of the page the tutor begins below the page title,
+   so use a shorter viewport-relative height and scroll inside the tutor. */
+.quiz-tutor .tutor-panel{
+  position:sticky;
+  top:16px;
+  margin:0;
+  width:100%;
+  max-height:calc(100vh - 220px);
+  min-height:280px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  padding-right:14px;
+}
+
+/* Make the internal scrollbar obvious enough to discover */
+.quiz-tutor .tutor-panel::-webkit-scrollbar{
+  width:10px;
+}
+.quiz-tutor .tutor-panel::-webkit-scrollbar-track{
+  background:#dbeafe;
+  border-radius:10px;
+}
+.quiz-tutor .tutor-panel::-webkit-scrollbar-thumb{
+  background:#93c5fd;
+  border-radius:10px;
+  border:2px solid #dbeafe;
+}
+.quiz-tutor .tutor-panel::-webkit-scrollbar-thumb:hover{
+  background:#60a5fa;
+}
+
+/* Keep tutor heading visible while its content scrolls */
+.quiz-tutor .tutor-title{
+  position:sticky;
+  top:-1px;
+  z-index:5;
+  background:#eff6ff;
+  padding:4px 0 10px;
+}
+
+/* On taller screens we can give the tutor a little more room */
+@media(min-height:1000px) and (min-width:1001px){
+  .quiz-tutor .tutor-panel{
+    max-height:calc(100vh - 190px);
+  }
+}
+
+/* On short desktop screens, reduce height further to guarantee visibility */
+@media(max-height:780px) and (min-width:1001px){
+  .quiz-tutor .tutor-panel{
+    max-height:calc(100vh - 180px);
+    min-height:240px;
+  }
+}
+
+/* Mobile/tablet returns to normal document flow */
+@media(max-width:1000px){
+  .quiz-tutor .tutor-panel{
+    position:static;
+    max-height:none;
+    min-height:0;
+    overflow:visible;
+    padding-right:16px;
+    scrollbar-gutter:auto;
+  }
+}
