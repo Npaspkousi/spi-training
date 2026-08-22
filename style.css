@@ -436,3 +436,42 @@ button{border:0;border-radius:10px;padding:10px 16px;cursor:pointer}.primary{bac
   background:#1d4ed8;
   border-color:#1d4ed8;
 }
+
+
+/* v1.12: tutor mascot in the upper-right of the tutor panel */
+.quiz-tutor .tutor-panel{
+  position:sticky;
+}
+
+.tutor-character{
+  position:absolute;
+  top:8px;
+  right:10px;
+  width:96px;
+  height:96px;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  z-index:6;
+}
+
+.quiz-tutor .tutor-title{
+  padding-right:108px;
+  min-height:72px;
+  display:flex;
+  align-items:flex-start;
+}
+
+/* Keep the character unobtrusive on smaller screens */
+@media(max-width:1000px){
+  .tutor-character{
+    width:76px;
+    height:76px;
+    top:8px;
+    right:8px;
+  }
+  .quiz-tutor .tutor-title{
+    padding-right:88px;
+    min-height:58px;
+  }
+}

@@ -1,4 +1,4 @@
-window.SPI_APP_VERSION="1.11";
+window.SPI_APP_VERSION="1.12";
 
 const GOOGLE_FORM_BASE="https://docs.google.com/forms/d/e/1FAIpQLSdezpP4OoJ6iocQJ9xiynfBtfxS31WpTi6EpO-jyXUljMBZIw/viewform?usp=pp_url";
 const FORM_ENTRY_PROBLEM_ID="entry.1021600444";
