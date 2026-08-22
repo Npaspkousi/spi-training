@@ -518,3 +518,48 @@ button{border:0;border-radius:10px;padding:10px 16px;cursor:pointer}.primary{bac
     padding-top: 14px;
   }
 }
+
+
+/* v1.12.3: move mascot into the tutor header upper-right area */
+.quiz-tutor .tutor-panel{
+  overflow: visible;
+  padding-top: 16px;
+}
+
+.tutor-character{
+  position: absolute;
+  top: 6px;
+  right: 18px;
+  left: auto;
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.10));
+}
+
+.quiz-tutor .tutor-title{
+  padding-right: 118px;
+  padding-top: 0;
+  min-height: 74px;
+  display: flex;
+  align-items: flex-end;
+}
+
+@media(max-width:1000px){
+  .quiz-tutor .tutor-panel{
+    padding-top: 14px;
+  }
+  .tutor-character{
+    top: 8px;
+    right: 12px;
+    width: 80px;
+    height: 80px;
+  }
+  .quiz-tutor .tutor-title{
+    padding-right: 92px;
+    min-height: 60px;
+  }
+}
