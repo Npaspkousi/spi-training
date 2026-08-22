@@ -1,4 +1,4 @@
-window.SPI_APP_VERSION="1.9";
+window.SPI_APP_VERSION="1.9.2";
 
 let QUESTIONS=[];
 const state={selected:[],index:0,correct:0,attempts:0,hintIndex:0,answered:false,records:[],settings:null,lastPool:[],studyMode:"normal",tutorHelpCount:0,understood:false,tutorShown:new Set()};

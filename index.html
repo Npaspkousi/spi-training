@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SPI練習 Web版 原本</title>
-  <link rel="stylesheet" href="style.css?v=1.9">
+  <link rel="stylesheet" href="style.css?v=1.9.2">
 </head>
 <body>
 <main class="app">
   <header>
     <h1>SPI練習 Web版</h1>
-    <p>750問・ブラウザ完結型 <strong>v1.9</strong></p>
+    <p>750問・ブラウザ完結型 <strong>v1.9.2</strong></p>
   </header>
 
   <section id="setup" class="card">
@@ -50,46 +50,60 @@
 
   <section id="quiz" class="card quiz-card hidden">
     <div class="quiz-layout">
+
       <div class="quiz-main">
-    <div class="status"><span id="progress"></span><span id="score"></span></div>
-    <div class="meta"><span id="problemId"></span><span id="chapter"></span><span id="difficulty"></span></div>
-    <h2 id="question"></h2>
-    <div id="options" class="options"></div>
-    <div class="controls">
-      <button id="hintBtn">ヒント</button>
-      <button id="nextBtn" class="primary hidden">次の問題</button>
-    </div>
-    <div id="hintBox" class="notice hidden"></div>
+        <div class="status"><span id="progress"></span><span id="score"></span></div>
 
-    
-      <div id="tutorLead" class="tutor-lead"></div>
-
-      <div id="tutorControls" class="tutor-controls">
-        <button id="tutorStep1Btn">① 問題を整理</button>
-        <button id="tutorStep2Btn">② 方針を立てる</button>
-        <button id="tutorStep3Btn">③ 一緒に仕上げる</button>
-      </div>
-
-      <div id="tutorBody"></div>
-
-      <div id="understandingArea" class="hidden">
-        <div class="understanding-title">理解確認</div>
-        <div id="understandingQuestion"></div>
-        <textarea id="understandingInput" rows="3" placeholder="自分の言葉で答えてみてください"></textarea>
-        <div class="tutor-actions">
-          <button id="showModelBtn">模範回答を見る</button>
-          <button id="understoodBtn">理解できた</button>
+        <div class="meta">
+          <span id="problemId"></span>
+          <span id="chapter"></span>
+          <span id="difficulty"></span>
         </div>
-        <div id="modelAnswer" class="model-answer hidden"></div>
-      </div>
-    </div>
 
-    <div id="feedback" class="feedback hidden"></div>
+        <h2 id="question"></h2>
+
+        <div id="options" class="options"></div>
+
+        <div class="controls">
+          <button id="hintBtn">ヒント</button>
+          <button id="nextBtn" class="primary hidden">次の問題</button>
+        </div>
+
+        <div id="hintBox" class="notice hidden"></div>
+        <div id="feedback" class="feedback hidden"></div>
       </div>
+
       <aside class="quiz-tutor">
         <div id="tutorPanel" class="tutor-panel hidden">
-      <div class="tutor-title">家庭教師モード</div>
+          <div class="tutor-title">家庭教師モード</div>
+
+          <div id="tutorLead" class="tutor-lead"></div>
+
+          <div id="tutorControls" class="tutor-controls">
+            <button id="tutorStep1Btn">① 問題を整理</button>
+            <button id="tutorStep2Btn">② 方針を立てる</button>
+            <button id="tutorStep3Btn">③ 一緒に仕上げる</button>
+          </div>
+
+          <div id="tutorBody"></div>
+
+          <div id="understandingArea" class="hidden">
+            <div class="understanding-title">理解確認</div>
+            <div id="understandingQuestion"></div>
+
+            <textarea id="understandingInput" rows="3"
+              placeholder="自分の言葉で答えてみてください"></textarea>
+
+            <div class="tutor-actions">
+              <button id="showModelBtn">模範回答を見る</button>
+              <button id="understoodBtn">理解できた</button>
+            </div>
+
+            <div id="modelAnswer" class="model-answer hidden"></div>
+          </div>
+        </div>
       </aside>
+
     </div>
   </section>
 
@@ -105,7 +119,7 @@
     </div>
   </section>
 </main>
-<script src="questions.js?v=1.9"></script>
-<script src="app.js?v=1.9"></script>
+<script src="questions.js?v=1.9.2"></script>
+<script src="app.js?v=1.9.2"></script>
 </body>
 </html>
