@@ -1,4 +1,12 @@
-window.SPI_APP_VERSION="1.9.3";
+window.SPI_APP_VERSION="1.11";
+
+const GOOGLE_FORM_BASE="https://docs.google.com/forms/d/e/1FAIpQLSdezpP4OoJ6iocQJ9xiynfBtfxS31WpTi6EpO-jyXUljMBZIw/viewform?usp=pp_url";
+const FORM_ENTRY_PROBLEM_ID="entry.1021600444";
+const FORM_ENTRY_QUESTION_TEXT="entry.1632223185";
+const FORM_ENTRY_LEVEL="entry.1489454136";
+const FORM_ENTRY_ERROR_TYPE="entry.1004720747";
+const FORM_ENTRY_COMMENT="entry.1686043115";
+
 
 let QUESTIONS=[];
 const state={selected:[],index:0,correct:0,attempts:0,hintIndex:0,answered:false,records:[],settings:null,lastPool:[],studyMode:"normal",tutorHelpCount:0,understood:false,tutorShown:new Set()};
@@ -19,6 +27,14 @@ function init(){
   $("nextLevelBtn").onclick=nextLevel;
   $("showModelBtn").onclick=showModelAnswer;
   $("understoodBtn").onclick=markUnderstood;
+  $("reportBtn").onclick=openReportModal;
+  $("reportCloseBtn").onclick=closeReportModal;
+  $("reportCancelBtn").onclick=closeReportModal;
+  $("copyReportBtn").onclick=copyReportText;
+  $("openGoogleFormBtn").onclick=openGoogleFormReport;
+  $("reportType").onchange=updateReportPreview;
+  $("reportComment").oninput=updateReportPreview;
+  $("reportModal").onclick=(e)=>{ if(e.target===$("reportModal")) closeReportModal(); };
   $("tutorStep1Btn").onclick=()=>showTutorStep(1);
   $("tutorStep2Btn").onclick=()=>showTutorStep(2);
   $("tutorStep3Btn").onclick=()=>showTutorStep(3);
@@ -447,6 +463,69 @@ function nextLevel(){
   state.settings={domain:d,level:String(next),count:state.settings.count,studyMode:state.studyMode};
   state.lastPool=[...pool];
   launchFromPool(pool,state.settings.count);
+}
+
+
+function buildReportText(){
+  const q=current();
+  if(!q) return "";
+  const type=$("reportType").value;
+  const comment=$("reportComment").value.trim();
+  return [
+    "【SPI問題エラー報告】",
+    `バージョン: ${window.SPI_APP_VERSION || "不明"}`,
+    `問題ID: ${q.problem_id}`,
+    `分野: ${q.chapter_name}`,
+    `Level: ${q.difficulty}`,
+    `報告種別: ${type}`,
+    "",
+    "問題文:",
+    q.question_text,
+    "",
+    "補足:",
+    comment || "なし"
+  ].join("\\n");
+}
+function updateReportPreview(){$("reportPreview").textContent=buildReportText();}
+function openReportModal(){
+  $("reportComment").value="";
+  $("reportType").selectedIndex=0;
+  updateReportPreview();
+  $("reportModal").classList.remove("hidden");
+}
+function closeReportModal(){$("reportModal").classList.add("hidden");}
+async function copyReportText(){
+  const text=buildReportText();
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch(e){
+    const area=document.createElement("textarea");
+    area.value=text;document.body.appendChild(area);area.select();document.execCommand("copy");area.remove();
+  }
+  $("copyReportBtn").textContent="コピーしました";
+  setTimeout(()=>$("copyReportBtn").textContent="報告文をコピー",1500);
+}
+
+
+function buildGoogleFormUrl(){
+  const q=current();
+  if(!q) return GOOGLE_FORM_BASE;
+
+  const params = new URLSearchParams();
+  params.set(FORM_ENTRY_PROBLEM_ID, q.problem_id || "");
+  params.set(FORM_ENTRY_QUESTION_TEXT, q.question_text || "");
+  params.set(FORM_ENTRY_LEVEL, `Level${q.difficulty ?? ""}`);
+  params.set(FORM_ENTRY_ERROR_TYPE, $("reportType").value || "");
+  params.set(FORM_ENTRY_COMMENT, $("reportComment").value.trim() || "");
+
+  const joiner = GOOGLE_FORM_BASE.includes("?") ? "&" : "?";
+  return GOOGLE_FORM_BASE + joiner + params.toString();
+}
+
+function openGoogleFormReport(){
+  updateReportPreview();
+  const url = buildGoogleFormUrl();
+  window.open(url, "_blank", "noopener");
 }
 
 function restart(){$("result").classList.add("hidden");$("quiz").classList.add("hidden");$("setup").classList.remove("hidden")}

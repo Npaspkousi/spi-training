@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SPI練習 Web版 原本</title>
-  <link rel="stylesheet" href="style.css?v=1.9.3">
+  <link rel="stylesheet" href="style.css?v=1.11">
 </head>
 <body>
 <main class="app">
   <header>
     <h1>SPI練習 Web版</h1>
-    <p>750問・ブラウザ完結型 <strong>v1.9.3</strong></p>
+    <p>750問・ブラウザ完結型 <strong>v1.11</strong></p>
   </header>
 
   <section id="setup" class="card">
@@ -44,6 +44,16 @@
         </select>
       </label>
     </div>
+    <div class="usage-notice">
+      <h3>利用上の注意</h3>
+      <ul>
+        <li><strong>この教材だけでSPI学習を完結させないでください。</strong>市販教材や他の練習問題も併用してください。</li>
+        <li>このサイトはSPI対策の補助教材です。本番の出題内容・画面・難易度・時間配分を完全に再現するものではありません。</li>
+        <li>問題・解説は検証していますが、誤りや分かりにくい表現が残る可能性があります。</li>
+        <li>不自然な問題、正答の疑い、解説不足などを見つけた場合は「エラーを報告」から知らせてください。</li>
+        <li>学習結果は目安として利用し、苦手分野は別教材でも確認してください。</li>
+      </ul>
+    </div>
     <button id="startBtn" class="primary">開始</button>
     <p id="setupMsg" class="msg"></p>
   </section>
@@ -66,6 +76,7 @@
 
         <div class="controls">
           <button id="hintBtn">ヒント</button>
+          <button id="reportBtn" class="report-btn">エラーを報告</button>
           <button id="nextBtn" class="primary hidden">次の問題</button>
         </div>
 
@@ -119,7 +130,37 @@
     </div>
   </section>
 </main>
-<script src="questions.js?v=1.9.3"></script>
-<script src="app.js?v=1.9.3"></script>
+<div id="reportModal" class="report-modal hidden" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <div class="report-dialog">
+    <div class="report-header">
+      <h2 id="reportTitle">問題のエラーを報告</h2>
+      <button id="reportCloseBtn" class="icon-btn" aria-label="閉じる">×</button>
+    </div>
+    <p class="report-help">現在の問題ID・問題文は自動で入ります。</p>
+    <label>報告内容
+      <select id="reportType">
+        <option>正答がおかしい</option>
+        <option>問題文が分かりにくい・曖昧</option>
+        <option>選択肢がおかしい</option>
+        <option>解説が分かりにくい・不足</option>
+        <option>Levelが合っていない</option>
+        <option>表示・動作の不具合</option>
+        <option>その他</option>
+      </select>
+    </label>
+    <label>補足（任意）
+      <textarea id="reportComment" rows="5" placeholder="どこがおかしいと感じたか書いてください"></textarea>
+    </label>
+    <div id="reportPreview" class="report-preview"></div>
+    <div class="report-actions">
+      <button id="openGoogleFormBtn" class="primary">Googleフォームで報告</button>
+      <button id="copyReportBtn">報告文をコピー</button>
+      <button id="reportCancelBtn">キャンセル</button>
+    </div>
+    <p class="report-note">※Googleフォームで直接報告する方法と、報告文をコピーして別経路で送る方法を併用できます。</p>
+  </div>
+</div>
+<script src="questions.js?v=1.11"></script>
+<script src="app.js?v=1.11"></script>
 </body>
 </html>
