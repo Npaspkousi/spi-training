@@ -475,3 +475,46 @@ button{border:0;border-radius:10px;padding:10px 16px;cursor:pointer}.primary{bac
     min-height:58px;
   }
 }
+
+
+/* v1.12.1: mascot sits on the outer top-right shoulder of the tutor panel */
+.quiz-tutor .tutor-panel{
+  position: sticky;
+  overflow: visible;
+}
+
+.tutor-character{
+  position: absolute;
+  top: -24px;
+  right: -24px;
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.10));
+}
+
+.quiz-tutor .tutor-title{
+  padding-right: 16px;
+  min-height: auto;
+  display: block;
+}
+
+/* keep enough top breathing room so the mascot feels intentional */
+.quiz-tutor .tutor-panel{
+  padding-top: 18px;
+}
+
+@media(max-width:1000px){
+  .tutor-character{
+    top: -18px;
+    right: -18px;
+    width: 88px;
+    height: 88px;
+  }
+  .quiz-tutor .tutor-panel{
+    padding-top: 14px;
+  }
+}
